@@ -3,7 +3,7 @@
    • Когда интернет есть, новая версия тихо скачивается в фоне и включается при следующем запуске.
    • Меню (menu.txt) проверяется в фоне; без интернета берётся последнее сохранённое.
    При обновлении файлов увеличьте номер версии ниже. */
-const VERSION = 'vasabi-v1.20.2';
+const VERSION = 'vasabi-v1.24.0';
 const CACHE = VERSION;
 const FONT_CACHE = 'vasabi-fonts';          // шрифты не удаляем при обновлениях
 const SHELL = [
@@ -18,7 +18,7 @@ const SHELL = [
   './icons/favicon-64.png'
 ];
 const OPTIONAL = [
-  './cars/1.jpg', './cars/1-s.jpg', './cars/2.jpg', './cars/2-s.jpg', './cars/3.jpg', './cars/3-s.jpg',
+  './cars/1.jpg', './cars/1-s.jpg', './cars/2.jpg', './cars/2-s.jpg', './cars/3.jpg', './cars/3-s.jpg', './cars/4.jpg', './cars/4-s.jpg', './cars/5.jpg', './cars/5-s.jpg', './cars/6.jpg', './cars/6-s.jpg', './cars/7.jpg', './cars/7-s.jpg', './cars/8.jpg', './cars/8-s.jpg', './cars/9.jpg', './cars/9-s.jpg', './cars/10.jpg', './cars/10-s.jpg', './cars/11.jpg', './cars/11-s.jpg',
   'https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Unbounded:wght@500;600;700;800&display=swap'
 ];
 

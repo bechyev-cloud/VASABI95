@@ -321,6 +321,19 @@ textarea:focus,input:focus{border-color:var(--acc);background:#fff}
 .mode-pill{height:32px;padding:0 11px 0 8px;border-radius:999px;border:1px solid #dfe2e6;background:#fff;display:flex;align-items:center;gap:6px;font-weight:800;font-size:12.5px;color:var(--ink2);transition:background .2s,color .2s,transform .12s;white-space:nowrap}
 .mode-pill:active{transform:scale(.94)}
 .mode-pill[hidden]{display:none}
+.icon-btn[hidden]{display:none}
+/* удержание шапки 5 секунд */
+#rot .hold-bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:linear-gradient(90deg,#1fa64a,#2563eb);z-index:5;border-radius:0 3px 3px 0;pointer-events:none;opacity:0}
+#rot.holding .hold-bar{opacity:1;width:100%;transition:width 3.6s linear,opacity .2s}
+/* окно пароля */
+.pw-box{position:relative;margin-top:6px}
+.pw-box input{width:100%;height:50px;border:1.5px solid var(--line);border-radius:15px;background:var(--soft);padding:0 48px 0 15px;font-size:16px;font-weight:700;outline:none;letter-spacing:.02em}
+.pw-box input:focus{border-color:var(--acc);background:#fff}
+.pw-box.err input{border-color:var(--danger);background:var(--danger-soft);animation:shake .4s}
+.pw-eye{position:absolute;right:6px;top:6px;width:38px;height:38px;border:0;border-radius:11px;background:transparent;display:grid;place-items:center;color:var(--muted)}
+.pw-msg{min-height:20px;margin:8px 2px 0;font-size:13px;font-weight:700;color:var(--danger)}
+.pw-lock{width:52px;height:52px;margin:0 auto 10px;border-radius:17px;background:var(--acc-soft);color:var(--acc2);display:grid;place-items:center}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 /* iPhone/Safari: шрифт полей ≥16px — иначе страница «прыгает» (зум) при вводе */
 @supports (-webkit-touch-callout: none) { textarea, input[type=text], input[type=number], input[type=tel], #note, .ed-item input.ed-name, .ed-price input { font-size:16px !important; } }
 #rot{-webkit-touch-callout:none}
@@ -524,7 +537,7 @@ textarea.code{font:600 13px/1.5 ui-monospace,'SFMono-Regular',Menlo,Consolas,mon
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
         <span class="lbl">Установить</span>
       </button>
-      <button class="icon-btn" id="openSettings" aria-label="Настройки">
+      <button class="icon-btn" id="openSettings" aria-label="Настройки" hidden>
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
     </div>
@@ -927,7 +940,7 @@ textarea.code{font:600 13px/1.5 ui-monospace,'SFMono-Regular',Menlo,Consolas,mon
 <script>
 (() => {
 'use strict';
-const VERSION = '1.20.2';
+const VERSION = '1.24.0';
 
 /* Стандартное меню (используется, если нет файла menu.txt) */
 const DEFAULT_MENU = `#VASABI_MENU
@@ -935,51 +948,61 @@ const DEFAULT_MENU = `#VASABI_MENU
 @phone = 79280017548
 
 [🍔 Бургеры]
-Гамбургер = 200
-Чизбургер = 230
-Двойной чизбургер = 330
-Чикенбургер = 250
-Бургер с беконом = 320
-Биг бургер = 380
+Гамбургер = 120
+Чизбургер = 140
 
 [🍕 Пицца]
-Пепперони маленькая = 450
-Пепперони средняя = 600
-Пепперони большая = 750
-Сырная маленькая = 420
-Сырная средняя = 570
-Сырная большая = 720
-
-[🥤 Напитки]
-Земляничный лимонад 0,5 л = 150
-Кола 0,5 л = 110
-Кола 1,5 л = 190
-Фанта 1,5 л = 190
-Сок 1 л = 170
-Вода 0,5 л = 50
+Пепперони большая = 450
+Пепперони средняя = 350
+Ассорти большая = 450
+Ассорти средняя = 350
+Мясная большая = 450
+Мясная средняя = 350
+Куриная большая = 450
+Куриная средняя = 350
+Сырная большая = 450
+Сырная средняя = 350
+4 сезона большая = 450
+4 сезона средняя = 350
+Грибная большая = 450
+Грибная средняя = 350
+Цезарь большая = 480
+Цезарь средняя = 380
 
 [🍣 Суши]
-Горячий шик = 450
-Филадельфия = 550
-Калифорния = 480
-Запечённый с лососем = 500
-Ролл с огурцом = 220
+Горячий шик = 250
+Филадельфия = 300
+Калифорния с крабом = 280
+Калифорния с лососем = 280
+Запечённый с лососем = 300
+Бешеный лосось = 280
+Тайфун = 280
+Цунами = 280
+Цезарь ролл = 280
+Сэндвич ролл = 300
 
 [🍟 Шаурма и закуски]
-Шаурма = 250
-Шаурма большая = 320
-Наггетсы = 200
+Наггетсы 6 шт = 150
+Наггетсы 9 шт = 180
 Картофель фри = 150
-Крылышки = 300
-Острые крылышки = 320
+Шаурма обычная = 200
+Шаурма в кляре = 250
+Кинкер = 220
+Салат Цезарь = 250
+Шашлычные крылышки 6 шт = 350
+Шашлычные крылышки 9 шт = 450
+Острые крылышки 6 шт = 350
+Острые крылышки 9 шт = 450
 
 [🥩 Стейки]
-Стейк из говядины = 900
-Стейк из курицы = 550
-Стейк из баранины = 850
+Стейк из говядины = 850
+
+[🥤 Напитки]
+Зеленокумский = 70
+Кола «Добрый» 1,5 л = 120
 `;
 
-const K = { menu:'vasabi.menu', edited:'vasabi.edited', remote:'vasabi.remote', cart:'vasabi.cart', note:'vasabi.note' };
+const K = { menu:'vasabi.menu2', edited:'vasabi.edited2', remote:'vasabi.remote2', cart:'vasabi.cart2', note:'vasabi.note' };   // «2» — сброс старого меню после замены
 const ls = {
   get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
   set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
@@ -1121,7 +1144,7 @@ function renderAll(){
 function safe(fn){ try { return fn(); } catch(err) { console.error('[VASABI]', err); } }
 function renderOrderSafe(){
   try { renderOrder(); }
-  catch(err) { console.error('[VASABI] order', err); imgMode = 0; ls.set('vasabi.imgMode', 0); try { renderOrder(); } catch(e2) { console.error(e2); } }
+  catch(err) { console.error('[VASABI] order', err); imgMode = 0; ls.set('vasabi.imgMode2', 0); try { renderOrder(); } catch(e2) { console.error(e2); } }
 }
 function itemHTML(it){
   const q = cart[it.id] || 0;
@@ -1194,9 +1217,9 @@ function orderLines(){
 const num = n => String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
 const p2 = n => String(n).padStart(2,'0');
 /* Вид текста заказа (кнопка «A»): Премиум → По категориям → Плашки → Жирные названия → Счёт */
-const TEXT_STYLES = ['Премиум', 'По категориям', 'Плашки', 'Жирные названия', 'Счёт'];
-let textStyle = Math.min(TEXT_STYLES.length - 1, Math.max(0, parseInt(ls.get('vasabi.textStyle3')) || 0));
-const styleIcon = () => ['💎', '🗂️', '▤', '<b>B</b>', '№'][textStyle];
+const TEXT_STYLES = ['По категориям', 'Премиум', 'Плашки', 'Жирные названия', 'Счёт'];   // первый — по умолчанию
+let textStyle = Math.min(TEXT_STYLES.length - 1, Math.max(0, parseInt(ls.get('vasabi.textStyle4')) || 0));
+const styleIcon = () => ['🗂️', '💎', '▤', '<b>B</b>', '№'][textStyle];
 function orderText(){
   const L = orderLines(); if (!L.length) return '';
   const total = L.reduce((s,l) => s + l.it.price * l.q, 0), cnt = L.reduce((s,l) => s + l.q, 0);
@@ -1211,7 +1234,7 @@ function orderText(){
   const width = (min, rows) => Math.min(30, Math.max(min, ...rows.map(([a, b]) => a.length + b.length + 3)));
   const LINE = '━━━━━━━━━━━━━━━';
   let t;
-  if (textStyle === 1) {            // По категориям
+  if (textStyle === 0) {            // По категориям (по умолчанию)
     const rows = L.map(l => [`${nm(l)} ×${l.q}`, num(l.it.price * l.q)]);
     const W = width(26, rows.concat([[`ВСЕГО ${cnt} шт`, num(total) + ' ₽']]));
     const groups = []; L.forEach((l,k) => { let g = groups.find(x => x.c === l.c); if (!g) { g = { c:l.c, rows:[] }; groups.push(g); } g.rows.push(rows[k]); });
@@ -1237,7 +1260,7 @@ function orderText(){
     t += L.map((l,k) => `${ico(l)} \`${fill(rows[k][0], rows[k][1], W, ' ')}\` *${num(l.it.price * l.q)}*`).join('\n');
     t += `\n\n> 📦 Позиций: ${cnt}\n> 💰 *ИТОГО: ${money(total)}*`;
     if (n) t += `\n\n💬 ${n}`;
-  } else {                          // Премиум (по умолчанию)
+  } else {                          // Премиум
     const rows = L.map(l => [`${nm(l)} ×${l.q}`, num(l.it.price * l.q)]), W = width(26, rows);
     t = `✨🔥 *${NAME.split('').join(' ')}* 🔥✨\n_${date} · ${time}_\n${LINE}\n\n`;
     t += L.map((l,k) => `${ico(l)} \`${fill(rows[k][0], rows[k][1], W, '·')}\``).join('\n');
@@ -1299,7 +1322,7 @@ function renderOrder(){
 function growNote(){ const t = $('#note'); if (!t) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
 /* ===== Отправка картинкой (GIF) ===== */
 const IMG_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 9"/></svg>';
-let imgMode = Math.min(3, Math.max(0, parseInt(ls.get('vasabi.imgMode')) || 0));   // 0 — текст (по умолчанию), 1..3 — картинка
+let imgMode = Math.min(3, Math.max(0, parseInt(ls.get('vasabi.imgMode2')) || 0));   // 0 — текст (по умолчанию), 1..3 — картинка
 let imgVar = Math.min(3, Math.max(1, parseInt(ls.get('vasabi.imgVar')) || 1));
 const imgIcon = () => IMG_ICON + (imgMode ? `<i>${imgMode}</i>` : '');
 const HAS_CARD = typeof window.VasabiCard === 'object' && typeof window.VasabiGif === 'object';
@@ -1369,7 +1392,7 @@ function openSendImage(){
       <button class="dl-btn" data-gifdl>Скачать картинку</button>`;
     const sh = $('[data-gifshare]', slot), dl = $('[data-gifdl]', slot);
     if (!canShare) { const nt = $('.send-note'); if (nt) nt.innerHTML = `Сохраните картинку и отправьте её в чат ${esc(menu.name || 'VASABI')}${menu.phone ? ' (' + prettyPhone(menu.phone) + ')' : ''} — откроется WhatsApp.`; }
-    if (sh) sh.onclick = async () => { try { await navigator.share({ files:[file], text: orderText() }); done(); } catch(err) { if (err && err.name !== 'AbortError') toast('Не удалось поделиться — скачайте картинку'); } };
+    if (sh) sh.onclick = async () => { try { await navigator.share({ files:[file] }); done(); } catch(err) { if (err && err.name !== 'AbortError') toast('Не удалось поделиться — скачайте картинку'); } };
     dl.onclick = () => { if (!canShare) { try { window.open(`https://wa.me/${menu.phone || ''}?text=${encodeURIComponent(orderText())}`, '_blank'); } catch(err) {} } downloadBlob(blob, file.name); toast('Картинка сохранена'); };
   }).catch(() => { const slot = $('#gifSlot'); if (slot) slot.innerHTML = '<div class="gif-wait">Не получилось сделать картинку</div>'; });
 }
@@ -1443,12 +1466,12 @@ document.addEventListener('click', e => {
   if (mt || mi) {
     const btn = mt || mi;
     if (mt) {
-      if (imgMode) { imgMode = 0; ls.set('vasabi.imgMode', 0); toast(`Отправка текстом · ${TEXT_STYLES[textStyle]}`); }
-      else { textStyle = (textStyle + 1) % TEXT_STYLES.length; ls.set('vasabi.textStyle3', textStyle); updateOrderText(); }
+      if (imgMode) { imgMode = 0; ls.set('vasabi.imgMode2', 0); toast(`Отправка текстом · ${TEXT_STYLES[textStyle]}`); }
+      else { textStyle = (textStyle + 1) % TEXT_STYLES.length; ls.set('vasabi.textStyle4', textStyle); updateOrderText(); }
     } else {
       if (!imgMode) { imgMode = imgVar; toast(`Отправка картинкой · ${VasabiCard.names[imgMode - 1]}`); }
       else { imgMode = imgMode % 3 + 1; }
-      imgVar = imgMode; ls.set('vasabi.imgMode', imgMode); ls.set('vasabi.imgVar', imgVar);
+      imgVar = imgMode; ls.set('vasabi.imgMode2', imgMode); ls.set('vasabi.imgVar', imgVar);
     }
     $('[data-mode-text]').classList.toggle('on', !imgMode); $('[data-mode-img]').classList.toggle('on', imgMode > 0);
     btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
@@ -1535,7 +1558,63 @@ function closeSheet(){
   document.body.style.overflow = '';
   renderAll();
 }
-$('#openSettings').addEventListener('click', openSheet);
+/* ===== Защита настроек =====
+   Пароль хранится только в виде SHA-256 (сам пароль в коде не записан). */
+const PW_HASH = '30ba79c37bd80a5f0be5687529665e8ecfdec6e6db0230a374e2b23fa1b03e8e';
+const pwOff = () => ls.get('vasabi.pwOff2') === '1';
+const gearOn = () => ls.get('vasabi.gear2') === '1';
+function applyGear(){ $('#openSettings').hidden = !gearOn(); }
+function sha256(str){
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const b = new TextEncoder().encode(str), l = b.length, n = ((l + 9 + 63) >> 6) << 6, m = new Uint8Array(n);
+  m.set(b); m[l] = 0x80; const bits = l * 8; for (let i = 0; i < 4; i++) m[n - 1 - i] = (bits >>> (8 * i)) & 255;
+  let h = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const w = new Uint32Array(64), r = (x, k) => (x >>> k) | (x << (32 - k));
+  for (let o = 0; o < n; o += 64) {
+    for (let i = 0; i < 16; i++) w[i] = (m[o+4*i] << 24) | (m[o+4*i+1] << 16) | (m[o+4*i+2] << 8) | m[o+4*i+3];
+    for (let i = 16; i < 64; i++) { const s0 = r(w[i-15],7) ^ r(w[i-15],18) ^ (w[i-15] >>> 3), s1 = r(w[i-2],17) ^ r(w[i-2],19) ^ (w[i-2] >>> 10); w[i] = (w[i-16] + s0 + w[i-7] + s1) | 0; }
+    let [a, bb, c, d, e, f, g, hh] = h;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (hh + (r(e,6) ^ r(e,11) ^ r(e,25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0, t2 = ((r(a,2) ^ r(a,13) ^ r(a,22)) + ((a & bb) ^ (a & c) ^ (bb & c))) | 0;
+      hh = g; g = f; f = e; e = (d + t1) | 0; d = c; c = bb; bb = a; a = (t1 + t2) | 0;
+    }
+    h = h.map((x, i) => (x + [a, bb, c, d, e, f, g, hh][i]) | 0);
+  }
+  return h.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+}
+function askPassword(){
+  return new Promise(res => {
+    const m = $('#modal'), okB = $('#mOk'), cB = $('#mCancel');
+    $('#mTitle').textContent = 'Вход в настройки';
+    $('#mBody').innerHTML = `<div class="pw-lock"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+      <div class="pw-box" id="pwBox"><input type="password" id="pwIn" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Пароль">
+      <button class="pw-eye" type="button" id="pwEye" aria-label="Показать пароль"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+      <p class="pw-msg" id="pwMsg"></p>`;
+    okB.textContent = 'Войти'; okB.className = 'm-ok green'; cB.textContent = 'Отмена'; okB.hidden = false; cB.hidden = false;
+    m.classList.add('show');
+    const inp = $('#pwIn'), box = $('#pwBox');
+    setTimeout(() => { try { inp.focus(); } catch(e) {} }, 250);
+    $('#pwEye').onclick = () => { inp.type = inp.type === 'password' ? 'text' : 'password'; inp.focus(); };
+    const done = v => { m.classList.remove('show'); okB.onclick = cB.onclick = m.onclick = inp.onkeydown = null; okB.className = 'm-ok'; res(v); };
+    const check = () => {
+      if (sha256(inp.value.trim()) === PW_HASH) { done(true); return; }
+      box.classList.remove('err'); void box.offsetWidth; box.classList.add('err');
+      $('#pwMsg').textContent = inp.value ? 'Неверный пароль' : 'Введите пароль'; inp.select();
+      if (navigator.vibrate) try { navigator.vibrate([40, 40, 40]); } catch(e) {}
+    };
+    okB.onclick = check; cB.onclick = () => done(false);
+    inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); check(); } };
+    const opened = Date.now();   /* палец, отпущенный после удержания, не должен закрыть окно */
+    m.onclick = e => { if (e.target === m && Date.now() - opened > 800) done(false); };
+  });
+}
+async function requestSettings(){
+  if ($('#sheet').classList.contains('open')) return;
+  if (!pwOff()) { const ok = await askPassword(); if (!ok) return; }
+  openSheet();
+}
+$('#openSettings').addEventListener('click', requestSettings);
+applyGear();
 $('#closeSettings').addEventListener('click', closeSheet);
 $$('.tab').forEach(t => t.addEventListener('click', () => {
   $$('.tab').forEach(x => x.classList.toggle('on', x === t));
@@ -1751,11 +1830,17 @@ function renderGeneral(){
       Через 1–2 минуты клиенты увидят новое меню.</div>
     <button class="sec-btn" data-gen="remote">Загрузить меню с сайта</button>
     <button class="sec-btn danger" data-gen="default">Вернуть стандартное меню</button>
+    <h4 class="set-h">Доступ к настройкам</h4>
+    <label class="switch-row"><div><b>Отключить пароль</b><small>Настройки будут открываться без пароля</small></div><span class="sw"><input type="checkbox" id="gPwOff" ${pwOff() ? 'checked' : ''}><span></span></span></label>
+    <label class="switch-row"><div><b>Показать значок настройки</b><small>Кнопка ⚙️ в шапке VASABI. Без неё — удерживайте шапку 5 секунд</small></div><span class="sw"><input type="checkbox" id="gGear" ${gearOn() ? 'checked' : ''}><span></span></span></label>
+    <p class="set-note">Пароль спрашивается при каждом входе в настройки.</p>
     <p class="ver">${esc(menu.name)} · версия ${VERSION} · Xstore95</p>`;
   startDemo();
 }
 $('#pane-general').addEventListener('input', e => {
   if (e.target.id === 'gName') { menu.name = e.target.value.trim() || 'VASABI'; markEdited(); }
+  if (e.target.id === 'gPwOff') { ls.set('vasabi.pwOff2', e.target.checked ? '1' : '0'); toast(e.target.checked ? 'Пароль отключён' : 'Пароль включён'); }
+  if (e.target.id === 'gGear') { ls.set('vasabi.gear2', e.target.checked ? '1' : '0'); applyGear(); toast(e.target.checked ? 'Значок настройки показан' : 'Значок скрыт — удерживайте шапку 5 секунд'); }
   if (e.target.id === 'gPhone') { menu.phone = normPhone(e.target.value); markEdited(); }
   if (e.target.dataset && e.target.dataset.ban) { menu.banners = { ...(menu.banners || {}), [e.target.dataset.ban]: e.target.checked }; markEdited(); renderAd(); startDemo(); }
 });
@@ -1782,20 +1867,25 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && $('#sheet').classLi
 
 /* ================= PWA ================= */
 let deferredPrompt = null;
-addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('#installBtn').hidden = false; });
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; if (!isInstalled()) $('#installBtn').hidden = false; });
 const IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const IS_STANDALONE = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-if (IS_IOS && !IS_STANDALONE && /^https?:/.test(location.protocol)) $('#installBtn').hidden = false;
+const IS_STANDALONE = (window.matchMedia && ['standalone','fullscreen','minimal-ui'].some(m => matchMedia(`(display-mode: ${m})`).matches)) || navigator.standalone === true;
+/* приложение уже установлено: открыто с рабочего стола или ранее подтверждена установка */
+function isInstalled(){ return IS_STANDALONE || ls.get('vasabi.installed') === '1'; }
+if (IS_STANDALONE) ls.set('vasabi.installed', '1');
+$('#installBtn').hidden = true;
+if (IS_IOS && !isInstalled() && /^https?:/.test(location.protocol)) $('#installBtn').hidden = false;
 $('#installBtn').addEventListener('click', async () => {
   if (!deferredPrompt) {
-    if (IS_IOS) ask({ title:'Установить VASABI', ok:'Понятно', cancel:'Закрыть', green:true,
-      body:`<div style="line-height:1.7">1. Нажмите кнопку <b>«Поделиться»</b> <span style="font-size:18px">⬆️</span> внизу Safari<br>2. Выберите <b>«На экран „Домой“»</b> ➕<br>3. Нажмите <b>«Добавить»</b> — появится иконка VASABI</div>` });
+    if (IS_IOS) ask({ title:'Установить VASABI', ok:'Уже установил', cancel:'Закрыть', green:true,
+      body:`<div style="line-height:1.7">1. Нажмите кнопку <b>«Поделиться»</b> <span style="font-size:18px">⬆️</span> внизу Safari<br>2. Выберите <b>«На экран „Домой“»</b> ➕<br>3. Нажмите <b>«Добавить»</b> — появится иконка VASABI</div>` })
+      .then(y => { if (y) { ls.set('vasabi.installed', '1'); $('#installBtn').hidden = true; } });
     return;
   }
-  deferredPrompt.prompt(); try { await deferredPrompt.userChoice; } catch(e) {}
-  deferredPrompt = null; $('#installBtn').hidden = true;
+  deferredPrompt.prompt(); let ch = null; try { ch = await deferredPrompt.userChoice; } catch(e) {}
+  deferredPrompt = null; if (ch && ch.outcome === 'accepted') { ls.set('vasabi.installed', '1'); $('#installBtn').hidden = true; }
 });
-addEventListener('appinstalled', () => { $('#installBtn').hidden = true; toast('Приложение установлено'); });
+addEventListener('appinstalled', () => { ls.set('vasabi.installed', '1'); $('#installBtn').hidden = true; toast('Приложение установлено'); });
 if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) {
   addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js', { updateViaCache:'none' }).then(reg => {
@@ -1892,16 +1982,24 @@ function renderAd(){
 }
 /* Свайп влево/вверх — следующая, вправо/вниз — предыдущая; удержание пальцем — пауза */
 (() => {
-  const rot = $('#rot'); let x0 = 0, y0 = 0, t0 = 0, down = false, swiped = false, longHold = false;
-  rot.addEventListener('pointerdown', e => { down = true; swiped = false; longHold = false; x0 = e.clientX; y0 = e.clientY; t0 = Date.now(); rotHolding = true; });
+  const rot = $('#rot'); let x0 = 0, y0 = 0, t0 = 0, down = false, swiped = false, longHold = false, holdT = 0, barT = 0;
+  rot.insertAdjacentHTML('beforeend', '<span class="hold-bar"></span>');
+  const stopHold = () => { clearTimeout(holdT); clearTimeout(barT); rot.classList.remove('holding'); };
+  rot.addEventListener('pointerdown', e => {
+    down = true; swiped = false; longHold = false; x0 = e.clientX; y0 = e.clientY; t0 = Date.now(); rotHolding = true;
+    stopHold();
+    barT = setTimeout(() => { if (down && !swiped) rot.classList.add('holding'); }, 1400);       // полоска появляется через 1,4 с
+    holdT = setTimeout(() => { if (down && !swiped) { longHold = true; stopHold(); if (navigator.vibrate) try { navigator.vibrate(30); } catch(err) {} requestSettings(); } }, 5000);
+  });
   rot.addEventListener('pointermove', e => {
     if (!down || swiped) return;
     const dx = e.clientX - x0, dy = e.clientY - y0;
     const ax = Math.abs(dx), ay = Math.abs(dy);
+    if (ax > 12 || ay > 12) stopHold();
     if (ax > 40 && ax > ay * 1.2) { swiped = true; if (rotGo) rotGo(dx < 0 ? 1 : -1); }
     else if (ay > 26 && ay > ax * 1.2) { swiped = true; if (rotGo) rotGo(dy < 0 ? 1 : -1); }
   });
-  const up = () => { if (!down) return; down = false; longHold = Date.now() - t0 > 600; rotHolding = false; rotHold = Date.now() + 1500; };
+  const up = () => { if (!down) return; stopHold(); down = false; longHold = Date.now() - t0 > 600; rotHolding = false; rotHold = Date.now() + 1500; };
   rot.addEventListener('pointerup', up); rot.addEventListener('pointercancel', up); rot.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') up(); });
   addEventListener('pointerup', up);
   rot.addEventListener('click', e => { if (swiped || longHold) { e.stopPropagation(); e.preventDefault(); } swiped = false; longHold = false; }, true);
@@ -1927,7 +2025,7 @@ const XS_PHONE = '79287390092';           // номер WhatsApp и для зв�
 const XS_ADDR  = 'с. Нижний Нойбер';
 /* Фото машин X-Car: в папке cars/ лежат 1.jpg, 2.jpg, 3.jpg … (большие)
    и 1-s.jpg, 2-s.jpg … (квадратные миниатюры). Укажите, сколько всего фото: */
-const CAR_PHOTOS = 3;
+const CAR_PHOTOS = 11;
 
 const PAGES = {
   xfinance: {
