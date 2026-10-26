@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>VASABI — меню и заказ</title>
 <meta name="description" content="Меню VASABI: бургеры, пицца, суши, шаурма, стейки. Соберите заказ и отправьте его в WhatsApp.">
 <meta name="theme-color" content="#ffffff">
@@ -28,6 +28,8 @@
   color-scheme:light;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body,button,a,input,textarea,label,.item,.cat-head{touch-action:manipulation}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html{scroll-behavior:smooth;scroll-padding-top:110px}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
 body{padding-bottom:calc(110px + env(safe-area-inset-bottom));overflow-x:hidden}
@@ -367,8 +369,8 @@ img{-webkit-user-drag:none}
 .wa-bubble b{font-weight:700}
 .wa-bubble>div{white-space:pre-wrap}
 .wa-bubble>div.nw{white-space:nowrap}
-.wa-bubble .mono{white-space:pre;font:400 12.6px/1.45 'Droid Sans Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace;margin:1px 0}
-.wa-bubble code{white-space:pre;font:400 12.6px/1.5 'Droid Sans Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px}
+.wa-bubble .mono{white-space:pre;font:400 var(--mf,12.6px)/1.45 'Droid Sans Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace;margin:1px 0}
+.wa-bubble code{white-space:pre;font:400 var(--mf,12.6px)/1.5 'Droid Sans Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px}
 .wa-bubble .q{border-left:4px solid #06cf9c;background:rgba(0,0,0,.035);border-radius:6px;padding:4px 8px;margin:3px 0}
 .switch-row{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:16px;margin-bottom:14px;cursor:pointer}
 .switch-row div{flex:1}.switch-row b{display:block;font-size:14.5px;font-weight:800}.switch-row small{display:block;color:var(--muted);font-size:12.5px;font-weight:600;margin-top:2px}
@@ -395,8 +397,8 @@ button.wa-btn{width:100%;border:0;font-family:inherit}
 .foot a{color:var(--ink2);text-decoration:none;font-weight:800}
 
 /* ---------- Bottom bar ---------- */
-.bar{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;width:calc(100% - 24px);max-width:536px;transform:translate(-50%,140%);transition:transform .35s cubic-bezier(.2,.8,.2,1);display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;border-radius:20px;padding:9px 9px 9px 18px;box-shadow:0 14px 34px rgba(17,19,22,.28)}
-.bar.show{transform:translate(-50%,0)}
+.bar{position:fixed;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;margin:0 auto;max-width:536px;transform:translate3d(0,calc(100% + 40px + env(safe-area-inset-bottom)),0);opacity:0;visibility:hidden;pointer-events:none;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s,visibility 0s linear .35s;display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;border-radius:20px;padding:9px 9px 9px 18px;box-shadow:0 14px 34px rgba(17,19,22,.28)}
+.bar.show{transform:translate3d(0,0,0);opacity:1;visibility:visible;pointer-events:auto;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .2s,visibility 0s}
 .bar-info{flex:1;min-width:0;display:flex;flex-direction:column}
 .bar-info small{color:#a9aeb6;font-weight:700;font-size:12px}
 .bar-info b{font:700 19px/1.2 var(--head)}
@@ -744,6 +746,18 @@ textarea.code{font:600 13px/1.5 ui-monospace,'SFMono-Regular',Menlo,Consolas,mon
   function emoji(c, e, x, y, size) { c.save(); c.globalAlpha = 1; c.fillStyle = '#000'; c.font = `${size}px ${EMO}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(e, x, y + size * .06); c.restore(); }
   function txt(c, s, x, y, size, col, weight = 600, align = 'left', font = FONT) { c.save(); c.font = `${weight} ${size}px ${font}`; c.fillStyle = col; c.textAlign = align; c.textBaseline = 'alphabetic'; c.fillText(s, x, y); c.restore(); }
   function dashed(c, x1, x2, y, col, dash = [8, 7], lw = 2) { c.save(); c.strokeStyle = col; c.lineWidth = lw; c.setLineDash(dash); c.beginPath(); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke(); c.restore(); }
+  /* название блюда: сначала чуть уменьшаем шрифт, если не влезает — переносим на 2 строки (без потери «6 шт» / «9 шт») */
+  function nameLines(c, s, size, max, weight = 700) {
+    for (let sz = size; sz >= size - 3; sz--) { c.font = `${weight} ${sz}px ${FONT}`; if (c.measureText(s).width <= max) return { sz, L: [s] }; }
+    const sz = size - 3; c.font = `${weight} ${sz}px ${FONT}`;
+    let L = wrap(c, s, max); if (L.length > 2) L = [L[0], L.slice(1).join(' ')];
+    return { sz, L: L.map(l => fit(c, l, max)) };
+  }
+  function drawName(c, s, x, yc, size, max, col) {
+    const { sz, L } = nameLines(c, s, size, max);
+    if (L.length === 1) txt(c, L[0], x, yc + 7, sz, col, 700);
+    else { txt(c, L[0], x, yc - 3, sz, col, 700); txt(c, L[1], x, yc + sz + 1, sz, col, 700); }
+  }
   function wrap(c, s, max) { const w = s.split(' '), out = []; let l = ''; w.forEach(x => { const tt = l ? l + ' ' + x : x; if (c.measureText(tt).width > max && l) { out.push(l); l = x; } else l = tt; }); if (l) out.push(l); return out; }
 
   const totals = d => ({ total: d.items.reduce((s, i) => s + i.p * i.q, 0), cnt: d.items.reduce((s, i) => s + i.q, 0) });
@@ -773,8 +787,7 @@ textarea.code{font:600 13px/1.5 ui-monospace,'SFMono-Regular',Menlo,Consolas,mon
       const yy = y + i * RH + RH / 2;
       if (i % 2 === 0) { c.fillStyle = '#f7f8fa'; rr(c, X + 14, yy - RH / 2 + 3, CW - 28, RH - 6, 12); c.fill(); }
       emoji(c, it.e, X + 44, yy, 26);
-      c.font = `700 20px ${FONT}`; const nm = fit(c, it.n, CW - 250);
-      txt(c, nm, X + 70, yy + 7, 20, '#111316', 700);
+      drawName(c, it.n, X + 70, yy, 20, CW - 250, '#111316');
       txt(c, '×' + it.q, X + CW - 150, yy + 7, 18, '#80868f', 700, 'right');
       txt(c, rub(it.p * it.q), X + CW - 26, yy + 7, 20, '#111316', 800, 'right');
     });
@@ -863,8 +876,9 @@ textarea.code{font:600 13px/1.5 ui-monospace,'SFMono-Regular',Menlo,Consolas,mon
       const yy = y + i * RH + RH / 2;
       c.fillStyle = i % 2 ? '#fff' : '#f6faf7'; rr(c, X + 16, yy - RH / 2 + 2, CW - 32, RH - 4, 14); c.fill();
       emoji(c, it.e, X + 46, yy, 24);
-      c.font = `700 19px ${FONT}`; txt(c, fit(c, it.n, CW - 250), X + 72, yy + 7, 19, '#111316', 700);
-      c.fillStyle = '#eaf7ee'; c.font = `800 14px ${FONT}`; const qs = '×' + it.q, qw = c.measureText(qs).width + 18;
+      c.font = `800 14px ${FONT}`; const qs = '×' + it.q, qw = c.measureText(qs).width + 18;
+      drawName(c, it.n, X + 72, yy, 19, CW - 160 - qw - 72 - 10, '#111316');
+      c.fillStyle = '#eaf7ee';
       rr(c, X + CW - 160 - qw, yy - 13, qw, 26, 13); c.fill(); txt(c, qs, X + CW - 160 - qw / 2, yy + 5, 14, '#16833a', 800, 'center');
       txt(c, rub(it.p * it.q), X + CW - 30, yy + 7, 19, '#111316', 800, 'right');
     });
@@ -904,8 +918,9 @@ textarea.code{font:600 13px/1.5 ui-monospace,'SFMono-Regular',Menlo,Consolas,mon
       c.fillStyle = '#fff4e5'; c.beginPath(); c.arc(x + 44, yy + 46, 28, 0, 7); c.fill(); emoji(c, it.e, x + 44, yy + 46, 30);
       c.fillStyle = '#111316'; c.font = `800 15px ${FONT}`; const q = '×' + it.q, qw = c.measureText(q).width + 18;
       rr(c, x + TW - qw - 14, yy + 16, qw, 28, 14); c.fill(); txt(c, q, x + TW - 14 - qw / 2, yy + 35, 15, '#fff', 800, 'center');
-      c.font = `700 18px ${FONT}`; txt(c, fit(c, it.n, TW - 32), x + 18, yy + 104, 18, '#111316', 700);
-      txt(c, rub(it.p * it.q), x + 18, yy + 132, 20, '#e9443a', 800);
+      const nl = nameLines(c, it.n, 18, TW - 32);
+      if (nl.L.length === 1) { txt(c, nl.L[0], x + 18, yy + 104, nl.sz, '#111316', 700); txt(c, rub(it.p * it.q), x + 18, yy + 132, 20, '#e9443a', 800); }
+      else { txt(c, nl.L[0], x + 18, yy + 94, nl.sz, '#111316', 700); txt(c, nl.L[1], x + 18, yy + 113, nl.sz, '#111316', 700); txt(c, rub(it.p * it.q), x + 18, yy + 139, 20, '#e9443a', 800); }
     });
     y += rows * (TH + GAP) + 6;
     const tg = c.createLinearGradient(X, 0, X + CW, 0); tg.addColorStop(0, '#e9443a'); tg.addColorStop(1, '#ff9f1c');
@@ -940,7 +955,7 @@ textarea.code{font:600 13px/1.5 ui-monospace,'SFMono-Regular',Menlo,Consolas,mon
 <script>
 (() => {
 'use strict';
-const VERSION = '1.24.0';
+const VERSION = '1.25.1';
 
 /* Стандартное меню (используется, если нет файла menu.txt) */
 const DEFAULT_MENU = `#VASABI_MENU
@@ -1011,7 +1026,7 @@ const ls = {
 const $ = (s,r=document) => r.querySelector(s);
 const $$ = (s,r=document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money = n => String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' ') + ' ₽';
+const money = n => String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0') + '\u00a0₽';
 const plural = (n,f) => { const a=Math.abs(n)%100, b=a%10; return f[(a>10&&a<20)?2:(b>1&&b<5)?1:(b===1?0:2)]; };
 const hash = s => { let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); };
 let uidN = 0; const rid = p => p + 'n' + Date.now().toString(36) + (uidN++).toString(36);
@@ -1230,7 +1245,26 @@ function orderText(){
   const ico = l => (l.c && l.c.emoji) || '▪️';
   const nm = l => clean(l.it.name);
   /* строка «название ····· сумма» ровно W символов */
-  const fill = (a, b, W, ch) => { if (a.length + b.length + 3 > W) a = a.slice(0, W - b.length - 4) + '…'; return a + ' ' + ch.repeat(Math.max(1, W - a.length - b.length - 2)) + ' ' + b; };
+  const fill1 = (a, b, W, ch) => a + ' ' + ch.repeat(Math.max(1, W - a.length - b.length - 2)) + ' ' + b;
+  /* длинное название не обрезаем, а переносим: последняя строка — хвост названия ····· сумма */
+  const wrapRow = (a, b, W, ch) => {
+    if (a.length + b.length + 3 <= W) return [fill1(a, b, W, ch)];
+    const words = [];
+    a.replace(/(\d[\d,.]*) (шт|л|мл|г|кг|см)(?=\s|$)/g, '$1\u00a0$2').replace(/ (×\d+)$/, '\u00a0$1').split(' ').map(w => w).forEach(w => { while (w.length > W) { words.push(w.slice(0, W)); w = w.slice(W); } if (w) words.push(w); });
+    const lines = []; let cur = '';
+    words.forEach(w => { const nx = cur ? cur + ' ' + w : w; if (nx.length <= W) cur = nx; else { lines.push(cur); cur = w; } });
+    const room = W - b.length - 3;
+    while (cur.length > room) {
+      const sp = cur.lastIndexOf(' ');
+      if (sp > 0) { const tail = cur.slice(sp + 1); lines.push(cur.slice(0, sp)); cur = tail; }
+      else { lines.push(cur.slice(0, room)); cur = cur.slice(room); }
+    }
+    lines.push(fill1(cur, b, W, ch));
+    return lines.map(x => x.replace(/\u00a0/g, ' '));
+  };
+  const fill = (a, b, W, ch) => wrapRow(a, b, W, ch).join('\n');
+  const IND = '\u2003\u2002';   // отступ под иконку для перенесённых строк
+  const icode = (pre, a, b, W, ch) => wrapRow(a, b, W, ch).map((x, i) => (i ? IND : pre + ' ') + '`' + x + '`').join('\n');
   const width = (min, rows) => Math.min(30, Math.max(min, ...rows.map(([a, b]) => a.length + b.length + 3)));
   const LINE = '━━━━━━━━━━━━━━━';
   let t;
@@ -1245,25 +1279,25 @@ function orderText(){
   } else if (textStyle === 2) {     // Плашки с иконками
     const rows = L.map(l => [`${nm(l)} ×${l.q}`, num(l.it.price * l.q)]), W = width(26, rows);
     t = `🔥 *${NAME} · ЗАКАЗ* 🔥\n_${date} · ${time}_\n\n`;
-    t += L.map((l,k) => `${ico(l)} \`${fill(rows[k][0], rows[k][1], W, '.')}\``).join('\n');
+    t += L.map((l,k) => icode(ico(l), rows[k][0], rows[k][1], W, '.')).join('\n');
     t += `\n\n📦 Позиций: *${cnt}*\n\n💰 *ИТОГО: ${money(total)}*`;
     if (n) t += `\n\n> 💬 ${n}`;
   } else if (textStyle === 3) {     // Жирные названия
     const rows = L.map(l => [`${l.q} × ${num(l.it.price)}`, num(l.it.price * l.q)]), W = width(24, rows);
     t = `🔥 *ЗАКАЗ · ${NAME}* 🔥\n_${date} · ${time}_\n\n`;
-    t += L.map((l,k) => `${ico(l)} *${nm(l)}*\n\`${fill(rows[k][0], rows[k][1], W, '·')}\``).join('\n\n');
+    t += L.map((l,k) => `${ico(l)} *${nm(l)}*\n` + wrapRow(rows[k][0], rows[k][1], W, '·').map(x => '`' + x + '`').join('\n')).join('\n\n');
     t += `\n\n${LINE}\n\n🧾 Позиций: ${cnt}\n💰 *ИТОГО: ${money(total)}*\n\n${LINE}`;
     if (n) t += `\n💬 *Комментарий:* ${n}`;
   } else if (textStyle === 4) {     // Счёт
     const rows = L.map((l,k) => [`${k+1}. ${nm(l)}`, '×' + l.q]), W = width(22, rows);
     t = `🔥 *ЗАКАЗ ${NAME}* 🔥\n🗓 ${date}  ⏰ ${time}\n\n`;
-    t += L.map((l,k) => `${ico(l)} \`${fill(rows[k][0], rows[k][1], W, ' ')}\` *${num(l.it.price * l.q)}*`).join('\n');
+    t += L.map((l,k) => icode(ico(l), rows[k][0], rows[k][1], W, ' ') + ` *${num(l.it.price * l.q)}*`).join('\n');
     t += `\n\n> 📦 Позиций: ${cnt}\n> 💰 *ИТОГО: ${money(total)}*`;
     if (n) t += `\n\n💬 ${n}`;
   } else {                          // Премиум
     const rows = L.map(l => [`${nm(l)} ×${l.q}`, num(l.it.price * l.q)]), W = width(26, rows);
     t = `✨🔥 *${NAME.split('').join(' ')}* 🔥✨\n_${date} · ${time}_\n${LINE}\n\n`;
-    t += L.map((l,k) => `${ico(l)} \`${fill(rows[k][0], rows[k][1], W, '·')}\``).join('\n');
+    t += L.map((l,k) => icode(ico(l), rows[k][0], rows[k][1], W, '·')).join('\n');
     t += `\n\n${LINE}\n💎 *ИТОГО  ${money(total)}*\n${LINE}`;
     if (n) t += `\n\n📝 _${n}_`;
   }
@@ -1317,12 +1351,15 @@ function renderOrder(){
     <div class="total"><span>Итого</span><b id="orderTotal">${money(total)}</b></div>
     <button class="wa-btn" id="waBtn" data-send>${IC.wa}Отправить в WhatsApp</button>
   </div>`;
-  growNote(); startPreview();
+  growNote(); startPreview(); fitMono();
 }
 function growNote(){ const t = $('#note'); if (!t) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
 /* ===== Отправка картинкой (GIF) ===== */
 const IMG_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 9"/></svg>';
-let imgMode = Math.min(3, Math.max(0, parseInt(ls.get('vasabi.imgMode2')) || 0));   // 0 — текст (по умолчанию), 1..3 — картинка
+/* по умолчанию: iPhone/iPad — фото «Чек», Android и остальные — текст; выбор клиента запоминается */
+const DEF_IMG = (/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && typeof window.VasabiCard === 'object' && typeof window.VasabiGif === 'object' ? 1 : 0;
+const savedImg = ls.get('vasabi.imgMode2');
+let imgMode = Math.min(3, Math.max(0, savedImg == null || savedImg === '' ? DEF_IMG : (parseInt(savedImg) || 0)));   // 0 — текст, 1..3 — картинка
 let imgVar = Math.min(3, Math.max(1, parseInt(ls.get('vasabi.imgVar')) || 1));
 const imgIcon = () => IMG_ICON + (imgMode ? `<i>${imgMode}</i>` : '');
 const HAS_CARD = typeof window.VasabiCard === 'object' && typeof window.VasabiGif === 'object';
@@ -1414,8 +1451,23 @@ function openSend(){
   const done = () => { m.classList.remove('show'); okB.hidden = false; cB.onclick = m.onclick = null; };
   cB.onclick = done; m.onclick = e => { if (e.target === m) done(); };
 }
+/* узкий экран: уменьшаем моноширинные строки предпросмотра, чтобы суммы не уезжали за край */
+function fitMono(){
+  const b = $('#orderText'); if (!b || b.hidden) return;
+  b.style.removeProperty('--mf');
+  const cs = getComputedStyle(b), avail = b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  let need = 0; b.querySelectorAll('.mono,.nw').forEach(e => { need = Math.max(need, e.scrollWidth); });
+  if (need <= avail + 1) return;
+  let mf = Math.max(8.5, 12.6 * avail / need - .15);
+  for (let k = 0; k < 12; k++) {
+    b.style.setProperty('--mf', mf.toFixed(2) + 'px');
+    let w = 0; b.querySelectorAll('.mono,.nw').forEach(e => { w = Math.max(w, e.scrollWidth); });
+    if (w <= avail + 1 || mf <= 8.5) break; mf = Math.max(8.5, mf - .5);
+  }
+}
+addEventListener('resize', () => { clearTimeout(fitMono.t); fitMono.t = setTimeout(fitMono, 120); });
 function updateOrderText(){
-  const pre = $('#orderText'); if (pre) pre.innerHTML = waHTML(orderText());
+  const pre = $('#orderText'); if (pre) { pre.innerHTML = waHTML(orderText()); fitMono(); }
   gifCache.key = '';
 }
 function renderBar(){
@@ -1476,7 +1528,7 @@ document.addEventListener('click', e => {
     $('[data-mode-text]').classList.toggle('on', !imgMode); $('[data-mode-img]').classList.toggle('on', imgMode > 0);
     btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
     $('#styleName').textContent = modeName();
-    $('#orderText').hidden = imgMode > 0; $('#imgBox').hidden = !imgMode;
+    $('#orderText').hidden = imgMode > 0; $('#imgBox').hidden = !imgMode; fitMono();
     gifCache.key = ''; startPreview(); warmGif();
     return;
   }
@@ -1500,6 +1552,9 @@ document.addEventListener('input', e => {
 });
 $('#barBtn').addEventListener('click', () => $('#order').scrollIntoView({ behavior:'smooth', block:'start' }));
 
+/* без увеличения страницы на iPhone: щипок и двойное нажатие */
+['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive:false }));
+document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive:false });
 let orderVisible = false;
 if ('IntersectionObserver' in window) {
   new IntersectionObserver(es => { orderVisible = es[0].isIntersecting; renderBar(); }, { threshold:0.12 }).observe($('#order'));
